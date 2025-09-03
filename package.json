@@ -7,6 +7,7 @@
     "markdown-confluence-sync": "dist/cli.js"
   },
   "scripts": {
+    "prepare": "tsc",
     "build": "tsc",
     "test": "tsc --noEmit && biome check src",
     "fix": "biome check src --fix",
@@ -18,6 +19,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.2.2",
     "@types/node": "^24.3.0",
+    "semantic-release": "^24.2.7",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   },
