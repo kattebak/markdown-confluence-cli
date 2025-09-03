@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
+	type Content,
 	ContentAttachmentsApi as ContentAttachmentsApiV1,
 	Configuration as V1Configuration,
 } from "@kattebak/confluence-axios-client-v1";
@@ -17,7 +18,7 @@ export interface UploadOptions {
 	comment?: string;
 }
 
-export class ConfluencePageAttachments {
+export class AttachmentsClient {
 	private attachmentApiv1: ContentAttachmentsApiV1;
 	private attachmentApiv2: AttachmentApi;
 
@@ -65,7 +66,7 @@ export class ConfluencePageAttachments {
 			comment: commentFile,
 		});
 
-		return response.data;
+		return response.data.results[0] as Required<Content>;
 	}
 
 	/**
@@ -86,11 +87,11 @@ export class ConfluencePageAttachments {
 	 */
 	async getAttachment(
 		attachmentId: string,
-	): Promise<GetAttachmentById200Response> {
+	): Promise<Required<GetAttachmentById200Response>> {
 		const response = await this.attachmentApiv2.getAttachmentById({
 			id: attachmentId,
 		});
 
-		return response.data;
+		return response.data as Required<GetAttachmentById200Response>;
 	}
 }

@@ -2,9 +2,9 @@
 
 import assert from "node:assert";
 import { parseArgs } from "node:util";
+import { AttachmentsClient } from "./lib/attachments";
+import { PageClient } from "./lib/client";
 import { AdfDocumentHelper } from "./lib/document";
-import { ConfluenceClient } from "./lib/client";
-import { ConfluencePageAttachments } from "./lib/attachments";
 
 const commands = [
 	"sync",
@@ -167,7 +167,7 @@ async function main() {
 	const document = args.file
 		? AdfDocumentHelper.fromMarkdownFile(args.file)
 		: undefined;
-	const client = new ConfluenceClient(args, document);
+	const client = new PageClient(args, document);
 
 	if (args.command !== "list" && !args.file) {
 		console.error(
@@ -192,7 +192,7 @@ async function main() {
 				break;
 			}
 			case "upload": {
-				const uploader = new ConfluencePageAttachments(args);
+				const uploader = new AttachmentsClient(args);
 				const uploadResult = await uploader.uploadAttachment(
 					args.pageId,
 					args.file,
@@ -201,7 +201,7 @@ async function main() {
 				break;
 			}
 			case "list-attachments": {
-				const lister = new ConfluencePageAttachments(args);
+				const lister = new AttachmentsClient(args);
 				const attachments = await lister.listAttachmentsForPage(args.pageId);
 				console.info(JSON.stringify(attachments));
 				break;
@@ -219,7 +219,7 @@ async function main() {
 				break;
 			}
 			case "get-attachment": {
-				const attachmentGetter = new ConfluencePageAttachments(args);
+				const attachmentGetter = new AttachmentsClient(args);
 				const attachmentDetails = await attachmentGetter.getAttachment(
 					args.attachmentId,
 				);

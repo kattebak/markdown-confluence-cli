@@ -4,7 +4,7 @@ import { markdownToAdf } from "marklassian";
 
 export interface AdfNode {
 	type: string;
-	attrs?: Record<string, unknown>;
+	attrs?: Record<string, string>;
 	content?: AdfNode[];
 	marks?: AdfMark[];
 	text?: string;
@@ -34,10 +34,6 @@ export class AdfDocumentHelper {
 		return new AdfDocumentHelper(title, adfContent, filePath);
 	}
 
-	static fromAdf(title: string, adfContent: AdfNode): AdfDocumentHelper {
-		return new AdfDocumentHelper(title, adfContent);
-	}
-
 	private static getPageTitleFromPath(filePath: string): string {
 		return filePath.split("/").pop()?.replace(".md", "") || "Untitled";
 	}
@@ -46,9 +42,6 @@ export class AdfDocumentHelper {
 		return JSON.stringify(this.content);
 	}
 
-	/**
-	 * Lists all image URLs found in the ADF content
-	 */
 	listImages(): string[] {
 		const images: string[] = [];
 		this.traverseContent(this.content, (node: AdfNode) => {
@@ -59,22 +52,10 @@ export class AdfDocumentHelper {
 		return images;
 	}
 
-	/**
-	 * Replaces image URLs in the ADF content (mutates the original content)
-	 * @param originalUrl The original URL to replace
-	 * @param newUrl The new URL to replace it with
-	 */
-	replaceImageUrl(originalUrl: string, newUrl: string): void {
-		this.traverseContent(this.content, (node: AdfNode) => {
-			if (node.type === "media" && node.attrs?.url === originalUrl) {
-				node.attrs.url = newUrl;
-			}
-		});
+	public traverse(visitor: (node: AdfNode) => void) {
+		this.traverseContent(this.content, visitor);
 	}
 
-	/**
-	 * Recursively traverses ADF content and applies a callback to each node
-	 */
 	private traverseContent(
 		node: AdfNode,
 		callback: (node: AdfNode) => void,

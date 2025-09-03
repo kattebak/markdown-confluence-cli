@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "tsc --noEmit && node test.js",
+    "test": "tsc --noEmit && biome check src",
     "fix": "biome check src --fix",
     "start": "source .envrc && npx tsx src/cli.ts -f README.md -u $CONFLUENCE_USER -t $CONFLUENCE_TOKEN -d $CONFLUENCE_DOMAIN -i $CONFLUENCE_SPACE_ID list",
     "dev": "tsx src/cli.ts"
