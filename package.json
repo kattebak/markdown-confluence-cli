@@ -1,0 +1,29 @@
+{
+  "name": "@kattebak/markdown-confluence-action",
+  "version": "0.0.1",
+  "description": "Synchronize markdown files to a confluence page",
+  "main": "dist/cli.js",
+  "bin": {
+    "markdown-confluence-sync": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc --noEmit && node test.js",
+    "fix": "biome check src --fix",
+    "start": "source .envrc && npx tsx src/cli.ts -f README.md -u $CONFLUENCE_USER -t $CONFLUENCE_TOKEN -d $CONFLUENCE_DOMAIN -i $CONFLUENCE_SPACE_ID list",
+    "dev": "tsx src/cli.ts"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.2",
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@kattebak/confluence-axios-client-v1": "^1.0.1",
+    "@kattebak/confluence-axios-client-v2": "^1.0.1",
+    "marklassian": "^1.0.4"
+  }
+}

@@ -1,0 +1,25 @@
+- Shortcut on error conditions, exit early, avoid the else statement
+- Use minimal, focused implementations
+- do not use any type
+- use types from the libraries
+- do not shadow types
+- do not create many custom types
+- use unknown type or assertions
+- Avoid verbose code that doesn't directly contribute to the solution
+- Don't add features or methods that aren't used or nessecary
+- Keep it DRY.
+- Use "for..of" loops instead of forEach
+- don't cast to any. don't use any. any is forbidden
+- Frontload IO, reading files, parsing things before application logic
+- Prioritize actionable functionality over explanatory code
+- **Only use try-catch when you intend to recover from the error**
+- If you're just logging and re-throwing, use promise chaining instead
+- Let errors bubble up naturally unless you have specific recovery logic
+- **Don't write usage examples in code comments**
+- **Don't create test files unless specifically requested**
+- **Don't provide usage examples in responses unless asked**
+- Keep code focused on implementation, not demonstration
+- Don't say Perfect. don't say comprehensive.
+- Most importantly, don't brag. We all know you're awesome
+- DON't you EVER EDIT THIS FILE.
+- Run npm fix to resolve formatting issues
