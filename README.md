@@ -1,13 +1,6 @@
 # Markdown to Confluence Sync Action
 
-A GitHub Action to sync markdown files to Confluence pages using the Confluence REST API v2.
-
-## Features
-
-- Converts markdown to Atlassian Document Format (ADF) using `marklassian`
-- Creates pages as subpages of a specified parent page
-- Uses Node.js built-in argument parser
-- TypeScript implementation with full type safety
+Sync markdown files to Confluence pages using the Confluence REST API v2/v1.
 
 ## Usage
 
@@ -28,62 +21,26 @@ node dist/cli.js -f <file> -u <user> -t <token> -p <page_id> -d <domain> -s <spa
 
 ### Example
 
-```bash
-node dist/cli.js -f README.md -u user@example.com -t your-api-token -p 123456789 -d your-company.atlassian.net -s MYSPACE
-```
-
-## Development
-
-### Build
+Create a new page, or update an existing page:
 
 ```bash
-npm run build
+npx @kattebak/markdown-confluence-cli sync -f README.md -u user@example.com -t your-api-token -d your-company.atlassian.net -s 987654321
 ```
 
-### Development Mode
+In this case, @kattebak/markdown-confluence-cli will:
 
-```bash
-npm run dev -- -f README.md -u user@example.com -t token -p 123456789 -d your-company.atlassian.net -s MYSPACE
-```
-
-## Configuration
-
-All configuration is now done via CLI parameters. No environment variables or manual code changes are needed.
-
-## Dependencies
-
-- `marklassian`: Converts markdown to ADF format
-- `@kattebak/confluence-axios-client-v2`: Confluence REST API v2 client
-- Node.js built-in `util.parseArgs` for argument parsing
-
-## Future Enhancements
-
-- [ ] Support for glob patterns to sync multiple files
-- [ ] Update existing pages instead of just creating new ones
-- [ ] Configuration file support
-- [ ] Environment variable support for credentials
-- [ ] Better error handling and logging
-
-## Architecture
-
-### updatePageWithInlineImages Flow
-
-The following sequence diagram shows how the `updatePageWithInlineImages` method processes local images and uploads them as attachments to Confluence:
+- Create the page if it doesn't exist
+- Or find the page by title
+- Upload images found in markdown
+- Update the page to reference confluence page attachments
 
 ![diagram](./diagram.png)
 
-### API Version Usage
+### Documentation
 
-- **v1 API**: Used for uploading attachments (`ContentAttachmentsApi`)
-- **v2 API**: Used for page operations and retrieving attachment details (`PageApi`, `AttachmentApi`)
+This implementation has been completely reverse-engineered, because Atlassian provides no documentation on how to deal with the _adf_ format in the REST api. By uploading pages in _adf_ you get the modern rendering behaviour and editor. If you don't care for any of that, you could simply post HTML with inlined images instead.
 
-The dual API approach is necessary because:
+- https://github.com/marketplace/actions/markdown-to-confluence-sync
+- https://www.npmjs.com/package/@telefonica/markdown-confluence-sync
 
-- v1 API provides the most reliable attachment upload functionality
-- v2 API provides better structured responses and fileId information needed for inline media references
-
-## Thanks to
-
-Many thanks to marklassian
-
-![And a test svg image](./star.drawio.svg)
+I learned a lot from studying these implementations as well.
