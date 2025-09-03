@@ -59,7 +59,7 @@ export class AdfDocumentHelper {
 	private traverseContent(
 		node: AdfNode,
 		callback: (node: AdfNode) => void,
-	): void {
+	) {
 		if (!node || typeof node !== "object") {
 			return;
 		}
