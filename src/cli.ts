@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import assert from "node:assert";
 import { parseArgs } from "node:util";
 import { AttachmentsClient } from "./lib/attachments";
 import { PageClient } from "./lib/client";
@@ -15,7 +14,6 @@ const commands = [
 	"upload",
 	"list-attachments",
 	"get",
-	"update-with-attachments",
 	"get-attachment",
 ] as const;
 
@@ -115,9 +113,7 @@ function parseCliArgs(): CliArgs {
 
 	// Validate file argument for commands that need it
 	if (
-		["sync", "create", "update", "upload", "update-with-attachments"].includes(
-			command,
-		) &&
+		["sync", "create", "update", "upload"].includes(command) &&
 		!values.file
 	) {
 		console.error(`Error: Command '${command}' requires -f <file> argument`);
@@ -128,8 +124,7 @@ function parseCliArgs(): CliArgs {
 	if (
 		(command === "upload" ||
 			command === "list-attachments" ||
-			command === "get" ||
-			command === "update-with-attachments") &&
+			command === "get") &&
 		!values.pageId
 	) {
 		console.error(`Error: Command '${command}' requires -p <pageId> argument`);
@@ -178,11 +173,6 @@ async function main() {
 
 	try {
 		switch (args.command) {
-			case "sync": {
-				const syncResult = await client.sync();
-				console.info(JSON.stringify(syncResult));
-				break;
-			}
 			case "list":
 				await client.listPages();
 				break;
@@ -211,11 +201,9 @@ async function main() {
 				console.info(JSON.stringify(pageContent));
 				break;
 			}
-			case "update-with-attachments": {
-				assert(document, "document is required");
-				const updateWithAttachmentsResult =
-					await client.updatePageWithInlineImages(args.pageId, document);
-				console.info(JSON.stringify(updateWithAttachmentsResult));
+			case "sync": {
+				const pageContent = await client.sync();
+				console.info(JSON.stringify(pageContent));
 				break;
 			}
 			case "get-attachment": {
