@@ -1,5 +1,5 @@
 {
-  "name": "@kattebak/markdown-confluence-action",
+  "name": "@kattebak/markdown-confluence-cli",
   "version": "0.0.1",
   "description": "Synchronize markdown files to a confluence page",
   "main": "dist/cli.js",
