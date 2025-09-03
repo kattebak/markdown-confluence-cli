@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "Synchronize markdown files to a confluence page",
   "main": "dist/cli.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "markdown-confluence-sync": "dist/cli.js"
   },
@@ -14,7 +17,7 @@
     "start": "source .envrc && npx tsx src/cli.ts -f README.md -u $CONFLUENCE_USER -t $CONFLUENCE_TOKEN -d $CONFLUENCE_DOMAIN -i $CONFLUENCE_SPACE_ID list",
     "dev": "tsx src/cli.ts"
   },
-  "author": "",
+  "author": "Matthijs van Henten",
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^2.2.2",
