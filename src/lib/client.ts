@@ -138,6 +138,7 @@ export class PageClient {
 		}
 
 		const attachments = new AttachmentsClient(this.args);
+		const basePath = path.dirname(this.document.sourceFile ?? "");
 
 		// First ensure the page exists (find or create)
 		const current = await this.findOrCreatePage(this.document);
@@ -161,8 +162,8 @@ export class PageClient {
 			const mediaNode = node.content[0];
 			const filePath = mediaNode.attrs?.url as unknown as string;
 			const fileName = path.basename(filePath);
-
-			const upload = await attachments.uploadAttachment(id, filePath);
+			const sourcePath = path.resolve(path.join(basePath, filePath));
+			const upload = await attachments.uploadAttachment(id, sourcePath);
 
 			const info = await attachments.getAttachment(upload.id);
 
