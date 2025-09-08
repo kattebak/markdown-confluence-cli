@@ -2,7 +2,7 @@
 
 import { parseArgs } from "node:util";
 import { AttachmentsClient } from "./lib/attachments";
-import { PageClient } from "./lib/client";
+import { PageClient } from "./lib/page-client";
 import { AdfDocumentHelper } from "./lib/document";
 
 const commands = [

@@ -3,7 +3,7 @@ import * as path from "node:path";
 import {
 	Configuration,
 	type CreatePage200Response,
-	MultiEntityResultPage,
+	type MultiEntityResultPage,
 	PageApi,
 	type PageBulk,
 } from "@kattebak/confluence-axios-client-v2";
