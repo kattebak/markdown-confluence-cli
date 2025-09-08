@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import path, { resolve } from "node:path";
 import { markdownToAdf } from "marklassian";
 
 export interface AdfNode {
@@ -35,7 +35,7 @@ export class AdfDocumentHelper {
 	}
 
 	private static getPageTitleFromPath(filePath: string): string {
-		return filePath.split("/").pop()?.replace(".md", "") || "Untitled";
+		return path.basename(filePath, path.extname(filePath));
 	}
 
 	getContentAsString(): string {

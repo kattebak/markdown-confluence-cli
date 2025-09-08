@@ -42,13 +42,13 @@ function parseCliArgs(): CliArgs {
 				type: "string",
 				short: "u",
 				description: "Confluence username/email",
-				default: process.env.CONFLUENCE_USER
+				default: process.env.CONFLUENCE_USER,
 			},
 			token: {
 				type: "string",
 				short: "t",
 				description: "Confluence API token",
-				default: process.env.CONFLUENCE_TOKEN
+				default: process.env.CONFLUENCE_TOKEN,
 			},
 			pageId: {
 				type: "string",
@@ -64,13 +64,13 @@ function parseCliArgs(): CliArgs {
 				type: "string",
 				short: "d",
 				description: "Confluence domain (e.g., your-company.atlassian.net)",
-				default: process.env.CONFLUENCE_DOMAIN
+				default: process.env.CONFLUENCE_DOMAIN,
 			},
 			spaceId: {
 				type: "string",
 				short: "i",
 				description: "Confluence space ID",
-				default: process.env.CONFLUENCE_SPACE_ID
+				default: process.env.CONFLUENCE_SPACE_ID,
 			},
 		},
 		allowPositionals: true,
@@ -181,10 +181,7 @@ async function main(args: Required<CliArgs>) {
 		}
 		case "upload": {
 			const uploader = new AttachmentsClient(args);
-			return uploader.uploadAttachment(
-				args.pageId,
-				args.file,
-			);
+			return uploader.uploadAttachment(args.pageId, args.file);
 		}
 		case "list-attachments": {
 			const lister = new AttachmentsClient(args);
@@ -198,9 +195,7 @@ async function main(args: Required<CliArgs>) {
 		}
 		case "get-attachment": {
 			const attachmentGetter = new AttachmentsClient(args);
-			return attachmentGetter.getAttachment(
-				args.attachmentId,
-			);
+			return attachmentGetter.getAttachment(args.attachmentId);
 		}
 		case "dump":
 			return document?.getContentAsString();
@@ -208,29 +203,23 @@ async function main(args: Required<CliArgs>) {
 			console.error(`Error: Unknown command: ${args.command}`);
 			process.exit(1);
 	}
-
 }
 
 if (require.main === module) {
 	const args = parseCliArgs() as Required<CliArgs>;
-	main(args).catch(error => {
-		console.error(
-			`Error executing ${args.command} command:`,
-			(error as Error).message || error,
-		);
+	main(args)
+		.catch((error) => {
+			console.error(
+				`Error executing ${args.command} command:`,
+				(error as Error).message || error,
+			);
 
-		if (error.name !== "AxiosError") {
-			console.error(error);
-		}
-		process.exit(1);
-
-	}).then(output => {
-		if (typeof output === "object" && "results" in output) {
-			console.table(output.results);
-			return;
-		}
-
-		console.table(output);
-
-	})
+			if (error.name !== "AxiosError") {
+				console.error(error);
+			}
+			process.exit(1);
+		})
+		.then((output) => {
+			console.info(JSON.stringify(output, null, 2));
+		});
 }
