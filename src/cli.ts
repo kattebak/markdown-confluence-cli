@@ -42,11 +42,13 @@ function parseCliArgs(): CliArgs {
 				type: "string",
 				short: "u",
 				description: "Confluence username/email",
+				default: process.env.CONFLUENCE_USER
 			},
 			token: {
 				type: "string",
 				short: "t",
 				description: "Confluence API token",
+				default: process.env.CONFLUENCE_TOKEN
 			},
 			pageId: {
 				type: "string",
@@ -62,11 +64,13 @@ function parseCliArgs(): CliArgs {
 				type: "string",
 				short: "d",
 				description: "Confluence domain (e.g., your-company.atlassian.net)",
+				default: process.env.CONFLUENCE_DOMAIN
 			},
 			spaceId: {
 				type: "string",
 				short: "i",
 				description: "Confluence space ID",
+				default: process.env.CONFLUENCE_SPACE_ID
 			},
 		},
 		allowPositionals: true,
@@ -157,8 +161,7 @@ export interface PageInfo {
 	version: number;
 }
 
-async function main() {
-	const args = parseCliArgs() as Required<CliArgs>;
+async function main(args: Required<CliArgs>) {
 	const document = args.file
 		? AdfDocumentHelper.fromMarkdownFile(args.file)
 		: undefined;
@@ -170,67 +173,64 @@ async function main() {
 		);
 		process.exit(1);
 	}
-
-	try {
-		switch (args.command) {
-			case "list":
-				await client.listPages();
-				break;
-			case "create": {
-				const createResult = await client.forceCreatePage();
-				console.info(JSON.stringify(createResult));
-				break;
-			}
-			case "upload": {
-				const uploader = new AttachmentsClient(args);
-				const uploadResult = await uploader.uploadAttachment(
-					args.pageId,
-					args.file,
-				);
-				console.info(JSON.stringify(uploadResult));
-				break;
-			}
-			case "list-attachments": {
-				const lister = new AttachmentsClient(args);
-				const attachments = await lister.listAttachmentsForPage(args.pageId);
-				console.info(JSON.stringify(attachments));
-				break;
-			}
-			case "get": {
-				const pageContent = await client.getPage(args.pageId);
-				console.info(JSON.stringify(pageContent));
-				break;
-			}
-			case "sync": {
-				const pageContent = await client.sync();
-				console.info(JSON.stringify(pageContent));
-				break;
-			}
-			case "get-attachment": {
-				const attachmentGetter = new AttachmentsClient(args);
-				const attachmentDetails = await attachmentGetter.getAttachment(
-					args.attachmentId,
-				);
-				console.info(JSON.stringify(attachmentDetails));
-				break;
-			}
-			case "dump":
-				console.info(document?.getContentAsString());
-				break;
-			default:
-				console.error(`Error: Unknown command: ${args.command}`);
-				process.exit(1);
+	switch (args.command) {
+		case "list":
+			return client.listPages();
+		case "create": {
+			return client.forceCreatePage();
 		}
-	} catch (error: unknown) {
+		case "upload": {
+			const uploader = new AttachmentsClient(args);
+			return uploader.uploadAttachment(
+				args.pageId,
+				args.file,
+			);
+		}
+		case "list-attachments": {
+			const lister = new AttachmentsClient(args);
+			return lister.listAttachmentsForPage(args.pageId);
+		}
+		case "get": {
+			return client.getPage(args.pageId);
+		}
+		case "sync": {
+			return client.sync();
+		}
+		case "get-attachment": {
+			const attachmentGetter = new AttachmentsClient(args);
+			return attachmentGetter.getAttachment(
+				args.attachmentId,
+			);
+		}
+		case "dump":
+			return document?.getContentAsString();
+		default:
+			console.error(`Error: Unknown command: ${args.command}`);
+			process.exit(1);
+	}
+
+}
+
+if (require.main === module) {
+	const args = parseCliArgs() as Required<CliArgs>;
+	main(args).catch(error => {
 		console.error(
 			`Error executing ${args.command} command:`,
 			(error as Error).message || error,
 		);
-		console.error(error);
-		process.exit(1);
-	}
-}
 
-if (require.main === module) {
-	main();
+		if (error.name !== "AxiosError") {
+			console.error(error);
+		}
+		process.exit(1);
+
+	}).then(output => {
+		if (typeof output === "object" && "results" in output) {
+			console.table(output.results);
+			return;
+		}
+
+		console.table(output);
+
+	})
 }

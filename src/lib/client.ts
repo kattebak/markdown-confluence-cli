@@ -3,6 +3,7 @@ import * as path from "node:path";
 import {
 	Configuration,
 	type CreatePage200Response,
+	MultiEntityResultPage,
 	PageApi,
 	type PageBulk,
 } from "@kattebak/confluence-axios-client-v2";
@@ -104,12 +105,12 @@ export class PageClient {
 		return data as Required<CreatePage200Response>;
 	}
 
-	async listPages(): Promise<void> {
+	async listPages(): Promise<MultiEntityResultPage> {
 		const { data } = await this.pageApi.getPagesInSpace({
 			id: parseInt(this.args.spaceId, 10),
 		});
 
-		console.table(data);
+		return data;
 	}
 
 	async forceCreatePage(): Promise<CreatePage200Response> {
