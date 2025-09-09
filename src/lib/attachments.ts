@@ -11,7 +11,7 @@ import {
 	type GetAttachmentById200Response,
 	Configuration as V2Configuration,
 } from "@kattebak/confluence-axios-client-v2";
-import type { CliArgs } from "../cli";
+import type { Options } from "../cli";
 
 export interface UploadOptions {
 	minorEdit?: boolean;
@@ -22,7 +22,7 @@ export class AttachmentsClient {
 	private attachmentApiv1: ContentAttachmentsApiV1;
 	private attachmentApiv2: AttachmentApi;
 
-	constructor(args: CliArgs) {
+	constructor(args: Options) {
 		const v1Configuration = new V1Configuration({
 			basePath: `https://${args.domain}`,
 			username: args.user,

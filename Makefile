@@ -9,5 +9,5 @@ build/doc/%.md: %.md
 	@echo "$< ==> $@"
 	mkdir -p $(dir $@)
 	npx @mermaid-js/mermaid-cli -i "$<" -o "$@" -e png
-	tsx src/cli.ts sync -f $@ -u $$CONFLUENCE_USER -t $$CONFLUENCE_TOKEN -d $$CONFLUENCE_DOMAIN -i $$CONFLUENCE_SPACE_ID
+	npx @kattebak/markdown-confluence-cli sync sync -f $@ -u $$CONFLUENCE_USER -t $$CONFLUENCE_TOKEN -d $$CONFLUENCE_DOMAIN -i $$CONFLUENCE_SPACE_ID
 

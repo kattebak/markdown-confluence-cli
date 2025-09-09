@@ -7,7 +7,7 @@ import {
 	PageApi,
 	type PageBulk,
 } from "@kattebak/confluence-axios-client-v2";
-import type { CliArgs, PageInfo } from "../cli";
+import type { Options } from "../cli";
 import { AttachmentsClient } from "./attachments";
 import type { AdfDocumentHelper, AdfNode } from "./document";
 
@@ -23,10 +23,10 @@ const isLocalFile = (url?: string): boolean => {
 
 export class PageClient {
 	private pageApi: PageApi;
-	private args: CliArgs;
+	private args: Options;
 	private document?: AdfDocumentHelper;
 
-	constructor(args: CliArgs, document?: AdfDocumentHelper) {
+	constructor(args: Options, document?: AdfDocumentHelper) {
 		this.args = args;
 		this.document = document;
 		const configuration = new Configuration({
@@ -69,7 +69,10 @@ export class PageClient {
 		return data as Required<CreatePage200Response>;
 	}
 
-	async updatePage(pageInfo: PageInfo): Promise<CreatePage200Response> {
+	async updatePage(pageInfo: {
+		id: string;
+		version: number;
+	}): Promise<CreatePage200Response> {
 		const { document } = this;
 
 		assert(document);
@@ -113,14 +116,6 @@ export class PageClient {
 		return data;
 	}
 
-	async forceCreatePage(): Promise<CreatePage200Response> {
-		if (!this.document) {
-			throw new Error("Document is required for create command");
-		}
-
-		return this.createPage(this.document);
-	}
-
 	async findOrCreatePage(
 		document: AdfDocumentHelper,
 	): Promise<Required<CreatePage200Response>> {
@@ -143,7 +138,7 @@ export class PageClient {
 
 		// First ensure the page exists (find or create)
 		const current = await this.findOrCreatePage(this.document);
-		const { title, id, version } = current;
+		const { id, version } = current;
 
 		const fileNodes: AdfNode[] = [];
 
@@ -183,7 +178,6 @@ export class PageClient {
 		// After processing inline images, update the page again with the modified document
 		return this.updatePage({
 			id,
-			title,
 			version: version.number ?? 0,
 		});
 	}

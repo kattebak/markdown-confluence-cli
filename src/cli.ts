@@ -1,225 +1,170 @@
 #!/usr/bin/env node
 
+import assert, { AssertionError } from "node:assert";
+import path from "node:path";
 import { parseArgs } from "node:util";
+import { isAxiosError } from "axios";
 import { AttachmentsClient } from "./lib/attachments";
-import { PageClient } from "./lib/page-client";
 import { AdfDocumentHelper } from "./lib/document";
+import { PageClient } from "./lib/page-client";
 
-const commands = [
-	"sync",
-	"list",
-	"create",
-	"update",
-	"dump",
-	"upload",
-	"list-attachments",
-	"get",
-	"get-attachment",
-] as const;
+const options = {
+	file: {
+		type: "string",
+		short: "f",
+		description: "Markdown file to sync",
+	},
+	user: {
+		type: "string",
+		short: "u",
+		description: "Confluence username/email",
+		default: process.env.CONFLUENCE_USER,
+	},
+	token: {
+		type: "string",
+		short: "t",
+		description: "Confluence API token",
+		default: process.env.CONFLUENCE_TOKEN,
+	},
+	pageId: {
+		type: "string",
+		short: "p",
+		description: "Parent page ID in Confluence",
+	},
+	attachmentId: {
+		type: "string",
+		short: "a",
+		description: "Attachment ID",
+	},
+	domain: {
+		type: "string",
+		short: "d",
+		description: "Confluence domain (e.g., your-company.atlassian.net)",
+		default: process.env.CONFLUENCE_DOMAIN,
+	},
+	spaceId: {
+		type: "string",
+		short: "i",
+		description: "Confluence space ID",
+		default: process.env.CONFLUENCE_SPACE_ID,
+	},
+} as const;
 
-type Command = (typeof commands)[number];
+const { file, attachmentId, pageId, ...allOptions } = options;
 
-export interface CliArgs {
-	command: Command;
-	file?: string;
-	user: string;
-	token: string;
-	pageId?: string;
-	attachmentId?: string;
-	domain: string;
-	spaceId: string;
-}
-
-function parseCliArgs(): CliArgs {
-	const { values, positionals } = parseArgs({
-		options: {
-			file: {
-				type: "string",
-				short: "f",
-				description: "Markdown file to sync",
-			},
-			user: {
-				type: "string",
-				short: "u",
-				description: "Confluence username/email",
-				default: process.env.CONFLUENCE_USER,
-			},
-			token: {
-				type: "string",
-				short: "t",
-				description: "Confluence API token",
-				default: process.env.CONFLUENCE_TOKEN,
-			},
-			pageId: {
-				type: "string",
-				short: "p",
-				description: "Parent page ID in Confluence",
-			},
-			attachmentId: {
-				type: "string",
-				short: "a",
-				description: "Attachment ID",
-			},
-			domain: {
-				type: "string",
-				short: "d",
-				description: "Confluence domain (e.g., your-company.atlassian.net)",
-				default: process.env.CONFLUENCE_DOMAIN,
-			},
-			spaceId: {
-				type: "string",
-				short: "i",
-				description: "Confluence space ID",
-				default: process.env.CONFLUENCE_SPACE_ID,
-			},
+const commands = {
+	sync: {
+		description: "Sync markdown file to page, matched by title",
+		options: { ...allOptions, file },
+		cmd: (args: Options) => {
+			const document = AdfDocumentHelper.fromMarkdownFile(args.file);
+			const client = new PageClient(args, document);
+			return client.sync();
 		},
-		allowPositionals: true,
-	});
-
-	// Validate command
-	const command = positionals[0] as Command;
-	if (!commands.includes(command)) {
-		console.error(
-			"Error: Command is required. Available commands: sync, list, create, update, upload, list-attachments, get, update-with-attachments, get-attachment",
-		);
-		console.error("Usage: node cli.js <command> [options]");
-		console.error(
-			"  sync                    - Synchronize page (list/create/update as needed)",
-		);
-		console.error("  list                    - List all pages in the space");
-		console.error(
-			"  create                  - Force create page (will log errors if exists)",
-		);
-		console.error(
-			"  update                  - Force update page (will log errors if not found)",
-		);
-		console.error(
-			"  upload                  - Upload file as attachment to page",
-		);
-		console.error("  list-attachments        - List attachments for a page");
-		console.error("  get                     - Get page content by ID");
-		console.error(
-			"  update-with-attachments - Update page and upload local files as attachments",
-		);
-		console.error(
-			"  get-attachment          - Get attachment details by attachment ID",
-		);
-		process.exit(1);
-	}
-
-	// Validate required arguments for all commands
-	if (!values.user || !values.token || !values.domain || !values.spaceId) {
-		console.error(
-			"Error: Required arguments: -u <user> -t <token> -d <domain> -i <space_id>",
-		);
-		process.exit(1);
-	}
-
-	// Validate file argument for commands that need it
-	if (
-		["sync", "create", "update", "upload"].includes(command) &&
-		!values.file
-	) {
-		console.error(`Error: Command '${command}' requires -f <file> argument`);
-		process.exit(1);
-	}
-
-	// Validate pageId for upload, list-attachments, get, and update-with-attachments commands
-	if (
-		(command === "upload" ||
-			command === "list-attachments" ||
-			command === "get") &&
-		!values.pageId
-	) {
-		console.error(`Error: Command '${command}' requires -p <pageId> argument`);
-		process.exit(1);
-	}
-
-	// Validate attachmentId for get-attachment command
-	if (command === "get-attachment" && !values.attachmentId) {
-		console.error(
-			`Error: Command '${command}' requires -a <attachmentId> argument`,
-		);
-		process.exit(1);
-	}
-
-	return {
-		command,
-		file: values.file,
-		user: values.user,
-		token: values.token,
-		pageId: values.pageId,
-		attachmentId: values.attachmentId,
-		domain: values.domain,
-		spaceId: values.spaceId,
-	};
-}
-
-export interface PageInfo {
-	id: string;
-	title: string;
-	version: number;
-}
-
-async function main(args: Required<CliArgs>) {
-	const document = args.file
-		? AdfDocumentHelper.fromMarkdownFile(args.file)
-		: undefined;
-	const client = new PageClient(args, document);
-
-	if (args.command !== "list" && !args.file) {
-		console.error(
-			`Error: File argument is required for ${args.command} command`,
-		);
-		process.exit(1);
-	}
-	switch (args.command) {
-		case "list":
+	},
+	list: {
+		description: "List pages in space",
+		options: allOptions,
+		cmd: (args: Options) => {
+			const document = AdfDocumentHelper.fromMarkdownFile(args.file);
+			const client = new PageClient(args, document);
 			return client.listPages();
-		case "create": {
-			return client.forceCreatePage();
-		}
-		case "upload": {
+		},
+	},
+	dump: {
+		describe: "Parse page into adf and dump as json string",
+		options: { ...allOptions, file },
+		cmd: (args: Options) => {
+			const document = AdfDocumentHelper.fromMarkdownFile(args.file);
+			return document.getContentAsString();
+		},
+	},
+	upload: {
+		describe: "Upload attachment to page",
+		options: { ...allOptions, pageId },
+		cmd: (args: Options) => {
 			const uploader = new AttachmentsClient(args);
 			return uploader.uploadAttachment(args.pageId, args.file);
-		}
-		case "list-attachments": {
+		},
+	},
+	"list-attachments": {
+		describe: "List attachments for a page",
+		options: { ...allOptions, pageId },
+		cmd: (args: Options) => {
 			const lister = new AttachmentsClient(args);
 			return lister.listAttachmentsForPage(args.pageId);
-		}
-		case "get": {
+		},
+	},
+	get: {
+		describe: "Get page from confluence by pageId",
+		options: { ...allOptions, pageId },
+		cmd: (args: Options) => {
+			const client = new PageClient(args);
 			return client.getPage(args.pageId);
-		}
-		case "sync": {
-			return client.sync();
-		}
-		case "get-attachment": {
+		},
+	},
+	"get-attachment": {
+		describe: "Get attachment from confluence by attachmentId",
+		options: { ...allOptions, attachmentId },
+		cmd: (args: Options) => {
 			const attachmentGetter = new AttachmentsClient(args);
 			return attachmentGetter.getAttachment(args.attachmentId);
-		}
-		case "dump":
-			return document?.getContentAsString();
-		default:
-			console.error(`Error: Unknown command: ${args.command}`);
-			process.exit(1);
+		},
+	},
+} as const;
+
+const { values, positionals } = parseArgs({
+	options,
+	strict: true,
+	allowPositionals: true,
+});
+
+export type Command = keyof typeof commands;
+export type Options = Required<typeof values>;
+
+const command = positionals[0] as Command;
+
+const usage = () => {
+	return (
+		`Usage: ${path.basename(process.argv[1])} [command] <options>\n\n` +
+		`Options:\n${Object.entries(options)
+			.map(([long, opt]) => `  -${opt.short} --${long} <${opt.description}>`)
+			.join("\n")}` +
+		`\n\nCommands: ${Object.keys(commands).join(" ")}\n`
+	);
+};
+
+const main = async (command: Command, options: Options) => {
+	assert(command, `No command provided`);
+
+	const { options: expectedOptions, cmd } = commands[command] ?? {};
+	assert(cmd, `Unknown command: "${command}"`);
+
+	for (const [key, opt] of Object.entries(expectedOptions)) {
+		assert(
+			key in options,
+			`Expected required option: --${key} | -${opt.short} <${opt.type}>`,
+		);
 	}
-}
 
-if (require.main === module) {
-	const args = parseCliArgs() as Required<CliArgs>;
-	main(args)
-		.catch((error) => {
-			console.error(
-				`Error executing ${args.command} command:`,
-				(error as Error).message || error,
-			);
+	return cmd(options);
+};
 
-			if (error.name !== "AxiosError") {
-				console.error(error);
-			}
+main(command, values as Options)
+	.catch((error) => {
+		if (error instanceof AssertionError) {
+			console.error(usage());
+			console.error(`Error: %s`, error.message);
 			process.exit(1);
-		})
-		.then((output) => {
-			console.info(JSON.stringify(output, null, 2));
-		});
-}
+		}
+
+		if (isAxiosError(error)) {
+			console.error(`Error: %s`, error.message);
+			process.exit(1);
+		}
+
+		return Promise.reject(error);
+	})
+	.then((output) => {
+		console.info(JSON.stringify(output, null, 2));
+	});
