@@ -50,7 +50,7 @@ const options = {
 	},
 	title: {
 		type: "string",
-		short: "T",
+		short: "l",
 		description: "Override page title (default: derived from file name)",
 	},
 } as const;

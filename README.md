@@ -7,7 +7,7 @@ Sync markdown files to Confluence pages using the Confluence REST API v2/v1.
 ### CLI Usage
 
 ```bash
-markdown-confluence-sync -f <file> -u <user> -t <token> -p <page_id> -d <domain> -s <space_id>
+markdown-confluence-sync --title <title> -f <file> -u <user> -t <token> -p <page_id> -d <domain> -s <space_id>
 ```
 
 ### Parameters
@@ -18,13 +18,14 @@ markdown-confluence-sync -f <file> -u <user> -t <token> -p <page_id> -d <domain>
 - `-p, --page-id`: Parent page ID in Confluence
 - `-d, --domain`: Confluence domain (e.g., your-company.atlassian.net)
 - `-s, --space-id`: Confluence space ID
+- `-l --title`: Page title (inferred from the path otherwise)
 
 ### Example
 
 Create a new page, or update an existing page:
 
 ```bash
-npx @kattebak/markdown-confluence-cli sync -f README.md -u $CONFLUENCE_USER -t $CONFLUENCE_TOKEN -d $CONFLUENCE_DOMAIN -i $CONFLUENCE_SPACE
+npx @kattebak/markdown-confluence-cli sync -l "Markdown to Confluence" -f README.md -u $CONFLUENCE_USER -t $CONFLUENCE_TOKEN -d $CONFLUENCE_DOMAIN -i $CONFLUENCE_SPACE
 ```
 
 In this case, @kattebak/markdown-confluence-cli will:
