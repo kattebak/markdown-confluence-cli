@@ -25,12 +25,15 @@ export class AdfDocumentHelper {
 		this.sourceFile = sourceFile;
 	}
 
-	static fromMarkdownFile(filePath: string): AdfDocumentHelper {
+	static fromMarkdownFile(
+		filePath: string,
+		overrideTitle?: string,
+	): AdfDocumentHelper {
 		const resolvedPath = resolve(filePath);
 		const markdownContent = readFileSync(resolvedPath, "utf-8");
 		const adfContent = markdownToAdf(markdownContent);
-		const title = AdfDocumentHelper.getPageTitleFromPath(filePath);
-
+		const title =
+			overrideTitle || AdfDocumentHelper.getPageTitleFromPath(filePath);
 		return new AdfDocumentHelper(title, adfContent, filePath);
 	}
 
