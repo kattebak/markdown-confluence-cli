@@ -48,6 +48,11 @@ const options = {
 		description: "Confluence space ID",
 		default: process.env.CONFLUENCE_SPACE_ID,
 	},
+	title: {
+		type: "string",
+		short: "T",
+		description: "Override page title (default: derived from file name)",
+	},
 } as const;
 
 const { file, attachmentId, pageId, ...allOptions } = options;
@@ -55,9 +60,12 @@ const { file, attachmentId, pageId, ...allOptions } = options;
 const commands = {
 	sync: {
 		description: "Sync markdown file to page, matched by title",
-		options: { ...allOptions, file },
+		options: { ...allOptions, file, title: options.title },
 		cmd: (args: Options) => {
-			const document = AdfDocumentHelper.fromMarkdownFile(args.file);
+			const document = AdfDocumentHelper.fromMarkdownFile(
+				args.file,
+				args.title,
+			);
 			const client = new PageClient(args, document);
 			return client.sync();
 		},
