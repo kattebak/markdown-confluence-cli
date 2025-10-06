@@ -1,3 +1,8 @@
+import assert from "node:assert";
+import path from "node:path";
+import test from "node:test";
+import { AdfDocumentHelper } from "./document";
+
 test("AdfDocumentHelper.listImages returns an array (README.md)", () => {
 	const adfDoc = AdfDocumentHelper.fromMarkdownFile("README.md");
 	const images = adfDoc.listImages();
@@ -12,11 +17,6 @@ test("AdfDocumentHelper.traverse visits all nodes (README.md)", () => {
 	});
 	assert.ok(nodeCount > 0, "Should visit at least one node");
 });
-
-import assert from "node:assert";
-import path from "node:path";
-import test from "node:test";
-import { AdfDocumentHelper } from "./document";
 
 test("AdfDocumentHelper infers title from file name", () => {
 	const adfDoc = AdfDocumentHelper.fromMarkdownFile("README.md");
