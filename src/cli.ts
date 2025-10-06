@@ -52,6 +52,7 @@ const options = {
 		type: "string",
 		short: "l",
 		description: "Override page title (default: derived from file name)",
+		optional: true,
 	},
 } as const;
 
@@ -149,6 +150,8 @@ const main = async (command: Command, options: Options) => {
 	assert(cmd, `Unknown command: "${command}"`);
 
 	for (const [key, opt] of Object.entries(expectedOptions)) {
+		if (opt.optional) return;
+
 		assert(
 			key in options,
 			`Expected required option: --${key} | -${opt.short} <${opt.type}>`,
