@@ -11,3 +11,4 @@ build/doc/%.md: %.md
 	npx @mermaid-js/mermaid-cli -i "$<" -o "$@" -e png
 	npx @kattebak/markdown-confluence-cli sync sync -f $@ -u $$CONFLUENCE_USER -t $$CONFLUENCE_TOKEN -d $$CONFLUENCE_DOMAIN -i $$CONFLUENCE_SPACE_ID
 
+.PHONY: test clean $(DOCUMENTATION_TARGETS)

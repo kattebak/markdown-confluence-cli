@@ -6,19 +6,34 @@ Sync markdown files to Confluence pages using the Confluence REST API v2/v1.
 
 ### CLI Usage
 
+This package is published to npm, and can be ran directly from your commandline using the node package manager npm.
+
 ```bash
-markdown-confluence-sync --title <title> -f <file> -u <user> -t <token> -p <page_id> -d <domain> -s <space_id>
+npx @kattebak/markdown-confluence-cli --title <title> -f <file> -u <user> -t <token> -p <page_id> -d <domain> -s <space_id>
 ```
+
+Alternatively, install this package in your node project and invoke it as `markdown-confluence-sync` directly.
 
 ### Parameters
 
-- `-f, --file`: Path to the markdown file to sync
-- `-u, --user`: Confluence username/email
-- `-t, --token`: Confluence API token
-- `-p, --page-id`: Parent page ID in Confluence
-- `-d, --domain`: Confluence domain (e.g., your-company.atlassian.net)
-- `-s, --space-id`: Confluence space ID
-- `-l --title`: Page title (inferred from the path otherwise)
+Run `npx @kattebak/markdown-confluence-cli` to view the built-in documentation:
+
+```
+npx @kattebak/markdown-confluence-cli
+Usage: markdown-confluence-sync [command] <options>
+
+Options:
+  -f --file <Markdown file to sync>
+  -u --user <Confluence username/email>
+  -t --token <Confluence API token>
+  -p --pageId <Parent page ID in Confluence>
+  -a --attachmentId <Attachment ID>
+  -d --domain <Confluence domain (e.g., your-company.atlassian.net)>
+  -i --spaceId <Confluence space ID>
+  -l --title <Override page title (default: derived from file name)>
+
+Commands: sync list dump upload list-attachments get get-attachment
+```
 
 ### Example
 
