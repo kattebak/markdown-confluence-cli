@@ -52,7 +52,7 @@ export class PageClient {
 		document: AdfDocumentHelper,
 	): Promise<Required<CreatePage200Response>> {
 		const pageData = {
-			pageId: this.args.pageId,
+			parentId: this.args.pageId,
 			spaceId: this.args.spaceId,
 			status: "current" as const,
 			title: document.title,
@@ -79,6 +79,7 @@ export class PageClient {
 
 		const updateData = {
 			id: pageInfo.id,
+			parentId: this.args.pageId,
 			status: "current" as const,
 			title: document.title,
 			body: {
