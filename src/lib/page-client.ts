@@ -133,39 +133,41 @@ export class PageClient {
 		return this.getPage(current.id);
 	}
 
-	async checkFreshness(): Promise<{
-		status: "missing" | "stale" | "up-to-date";
-		title: string;
-		pageUpdated?: string;
-	}> {
+	async listPagesWithContent(): Promise<Map<string, { id: string; version: number }>> {
+		const pages = new Map<string, { id: string; version: number }>();
+		let cursor: string | undefined;
+
+		do {
+			const { data } = await this.pageApi.getPagesInSpace({
+				id: parseInt(this.args.spaceId, 10),
+				limit: 250,
+				...(cursor ? { cursor } : {}),
+			});
+
+			for (const page of data.results ?? []) {
+				if (!page.title || !page.id) continue;
+				pages.set(page.title, {
+					id: page.id,
+					version: page.version?.number ?? 0,
+				});
+			}
+
+			const next = data._links?.next;
+			cursor = next ? new URL(next, "http://x").searchParams.get("cursor") ?? undefined : undefined;
+		} while (cursor);
+
+		return pages;
+	}
+
+	checkFreshnessAgainstIndex(
+		index: Map<string, { id: string; version: number }>,
+	): { status: "missing" | "exists"; title: string } {
 		if (!this.document) {
-			throw new Error("Document is required for dry-run command");
+			throw new Error("Document is required");
 		}
-
 		const { title } = this.document;
-		const page = await this.findPageByTitle(title);
-
-		if (!page) {
-			return { status: "missing", title };
-		}
-
-		const currentContent = this.document.getContentAsString();
-		const existingPage = await this.getPage(page.id);
-		const existingContent = existingPage.body?.atlas_doc_format?.value ?? "";
-
-		if (currentContent !== existingContent) {
-			return {
-				status: "stale",
-				title,
-				pageUpdated: existingPage.version?.createdAt,
-			};
-		}
-
-		return {
-			status: "up-to-date",
-			title,
-			pageUpdated: existingPage.version?.createdAt,
-		};
+		const page = index.get(title);
+		return { status: page ? "exists" : "missing", title };
 	}
 
 	async sync(): Promise<CreatePage200Response> {

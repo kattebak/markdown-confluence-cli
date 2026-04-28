@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import assert, { AssertionError } from "node:assert";
+import { globSync } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { isAxiosError } from "axios";
@@ -73,15 +74,22 @@ const commands = {
 	},
 	"dry-run": {
 		description:
-			"Check if page needs syncing (returns status: missing, stale, or up-to-date)",
-		options: { ...allOptions, file, title: options.title },
-		cmd: async (args: Options) => {
-			const document = AdfDocumentHelper.fromMarkdownFile(
-				args.file,
-				args.title,
-			);
-			const client = new PageClient(args, document);
-			return client.checkFreshness();
+			"Check if pages need syncing. Accepts -f file or positional glob patterns.",
+		options: { ...allOptions, file: { ...file, optional: true }, title: options.title },
+		cmd: async (args: Options, positionals: string[]) => {
+			const files = resolveFiles(args.file, positionals);
+			assert(files.length > 0, "No files specified. Use -f <file> or pass glob patterns as positional args.");
+
+			const client = new PageClient(args);
+			const index = await client.listPagesWithContent();
+
+			const results = files.map((file) => {
+				const document = AdfDocumentHelper.fromMarkdownFile(file, files.length === 1 ? args.title : undefined);
+				const fileClient = new PageClient(args, document);
+				return fileClient.checkFreshnessAgainstIndex(index);
+			});
+
+			return files.length === 1 ? results[0] : results;
 		},
 	},
 	list: {
@@ -145,6 +153,26 @@ export type Command = keyof typeof commands;
 export type Options = Required<typeof values>;
 
 const command = positionals[0] as Command;
+const fileArgs = positionals.slice(1);
+
+function resolveFiles(fileOpt: string | undefined, positionals: string[]): string[] {
+	const files: string[] = [];
+
+	if (fileOpt) {
+		files.push(fileOpt);
+	}
+
+	for (const pattern of positionals) {
+		if (pattern.includes("*") || pattern.includes("?")) {
+			files.push(...globSync(pattern));
+		} else {
+			files.push(pattern);
+		}
+	}
+
+	return [...new Set(files)];
+}
+
 
 const usage = () => {
 	return (
@@ -156,7 +184,7 @@ const usage = () => {
 	);
 };
 
-const main = async (command: Command, options: Options) => {
+const main = async (command: Command, options: Options, positionals: string[]) => {
 	assert(command, `No command provided`);
 
 	const { options: expectedOptions, cmd } = commands[command] ?? {};
@@ -171,10 +199,10 @@ const main = async (command: Command, options: Options) => {
 		);
 	}
 
-	return cmd(options);
+	return cmd(options, positionals);
 };
 
-main(command, values as Options)
+main(command, values as Options, fileArgs)
 	.catch((error) => {
 		if (error instanceof AssertionError) {
 			console.error(usage());
