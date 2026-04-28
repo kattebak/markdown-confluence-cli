@@ -161,13 +161,14 @@ export class PageClient {
 
 	checkFreshnessAgainstIndex(
 		index: Map<string, { id: string; version: number }>,
-	): { status: "missing" | "exists"; title: string } {
+		file: string,
+	): { status: "missing" | "exists"; title: string; file: string } {
 		if (!this.document) {
 			throw new Error("Document is required");
 		}
 		const { title } = this.document;
 		const page = index.get(title);
-		return { status: page ? "exists" : "missing", title };
+		return { status: page ? "exists" : "missing", title, file };
 	}
 
 	async sync(): Promise<CreatePage200Response> {

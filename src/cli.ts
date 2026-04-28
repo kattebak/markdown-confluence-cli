@@ -86,7 +86,7 @@ const commands = {
 			const results = files.map((file) => {
 				const document = AdfDocumentHelper.fromMarkdownFile(file, files.length === 1 ? args.title : undefined);
 				const fileClient = new PageClient(args, document);
-				return fileClient.checkFreshnessAgainstIndex(index);
+				return fileClient.checkFreshnessAgainstIndex(index, file);
 			});
 
 			return files.length === 1 ? results[0] : results;
