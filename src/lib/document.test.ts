@@ -1,7 +1,9 @@
 import assert from "node:assert";
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { AdfDocumentHelper } from "./document";
+import { AdfDocumentHelper, parseFrontmatter } from "./document";
 
 test("AdfDocumentHelper.listImages returns an array (README.md)", () => {
 	const adfDoc = AdfDocumentHelper.fromMarkdownFile("README.md");
@@ -35,6 +37,59 @@ test("AdfDocumentHelper handles special characters in file name", () => {
 	const adfDoc = AdfDocumentHelper.fromMarkdownFile(filePath);
 	assert.strictEqual(adfDoc.title, "spécial-chär");
 	require("node:fs").unlinkSync(filePath);
+});
+
+test("parseFrontmatter extracts confluence_page_title", () => {
+	const { frontmatter, body } = parseFrontmatter(
+		"---\nconfluence_page_title: My Page\n---\n# Hello\n",
+	);
+	assert.strictEqual(frontmatter.confluence_page_title, "My Page");
+	assert.strictEqual(body, "# Hello\n");
+});
+
+test("parseFrontmatter extracts confluence_page_id", () => {
+	const { frontmatter } = parseFrontmatter(
+		"---\nconfluence_page_id: 2223177735\n---\nContent\n",
+	);
+	assert.strictEqual(frontmatter.confluence_page_id, "2223177735");
+});
+
+test("parseFrontmatter returns empty frontmatter for plain markdown", () => {
+	const { frontmatter, body } = parseFrontmatter("# Just markdown\n");
+	assert.deepStrictEqual(frontmatter, {});
+	assert.strictEqual(body, "# Just markdown\n");
+});
+
+test("fromMarkdownFile uses confluence_page_title from frontmatter", () => {
+	const tmp = path.join(os.tmpdir(), "fm-title-test.md");
+	fs.writeFileSync(tmp, "---\nconfluence_page_title: FM Title\n---\n# Body\n");
+	const doc = AdfDocumentHelper.fromMarkdownFile(tmp);
+	assert.strictEqual(doc.title, "FM Title");
+	fs.unlinkSync(tmp);
+});
+
+test("fromMarkdownFile stores confluence_page_id", () => {
+	const tmp = path.join(os.tmpdir(), "fm-id-test.md");
+	fs.writeFileSync(tmp, "---\nconfluence_page_id: 12345\n---\n# Body\n");
+	const doc = AdfDocumentHelper.fromMarkdownFile(tmp);
+	assert.strictEqual(doc.confluencePageId, "12345");
+	fs.unlinkSync(tmp);
+});
+
+test("frontmatter title takes precedence over overrideTitle", () => {
+	const tmp = path.join(os.tmpdir(), "fm-precedence-test.md");
+	fs.writeFileSync(
+		tmp,
+		"---\nconfluence_page_title: Frontmatter Wins\n---\n# Body\n",
+	);
+	const doc = AdfDocumentHelper.fromMarkdownFile(tmp, "CLI Title");
+	assert.strictEqual(doc.title, "Frontmatter Wins");
+	fs.unlinkSync(tmp);
+});
+
+test("overrideTitle is used when no frontmatter title", () => {
+	const doc = AdfDocumentHelper.fromMarkdownFile("README.md", "CLI Title");
+	assert.strictEqual(doc.title, "CLI Title");
 });
 
 test("AdfDocumentHelper throws on non-existent file", (_t) => {
