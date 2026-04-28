@@ -120,6 +120,10 @@ export class PageClient {
 	async findOrCreatePage(
 		document: AdfDocumentHelper,
 	): Promise<Required<CreatePage200Response>> {
+		if (document.confluencePageId) {
+			return this.getPage(document.confluencePageId);
+		}
+
 		const current = await this.findPageByTitle(document.title);
 
 		if (!current) {

@@ -14,15 +14,50 @@ interface AdfMark {
 	attrs?: Record<string, unknown>;
 }
 
+interface Frontmatter {
+	confluence_page_id?: string;
+	confluence_page_title?: string;
+}
+
+export function parseFrontmatter(content: string): {
+	frontmatter: Frontmatter;
+	body: string;
+} {
+	const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
+	if (!match) return { frontmatter: {}, body: content };
+
+	const frontmatter: Frontmatter = {};
+	for (const line of match[1].split(/\r?\n/)) {
+		const sep = line.indexOf(":");
+		if (sep === -1) continue;
+		const key = line.slice(0, sep).trim();
+		const value = line.slice(sep + 1).trim();
+		if (key === "confluence_page_id") frontmatter.confluence_page_id = value;
+		if (key === "confluence_page_title")
+			frontmatter.confluence_page_title = value;
+	}
+
+	return { frontmatter, body: content.slice(match[0].length) };
+}
+
 export class AdfDocumentHelper {
 	readonly title: string;
 	readonly content: AdfNode;
 	readonly sourceFile?: string;
+	readonly confluencePageId?: string;
+	readonly confluencePageTitle?: string;
 
-	constructor(title: string, adfContent: AdfNode, sourceFile?: string) {
+	constructor(
+		title: string,
+		adfContent: AdfNode,
+		sourceFile?: string,
+		frontmatter?: Frontmatter,
+	) {
 		this.title = title;
 		this.content = adfContent;
 		this.sourceFile = sourceFile;
+		this.confluencePageId = frontmatter?.confluence_page_id;
+		this.confluencePageTitle = frontmatter?.confluence_page_title;
 	}
 
 	static fromMarkdownFile(
@@ -31,10 +66,13 @@ export class AdfDocumentHelper {
 	): AdfDocumentHelper {
 		const resolvedPath = resolve(filePath);
 		const markdownContent = readFileSync(resolvedPath, "utf-8");
-		const adfContent = markdownToAdf(markdownContent);
+		const { frontmatter, body } = parseFrontmatter(markdownContent);
+		const adfContent = markdownToAdf(body);
 		const title =
-			overrideTitle || AdfDocumentHelper.getPageTitleFromPath(filePath);
-		return new AdfDocumentHelper(title, adfContent, filePath);
+			frontmatter.confluence_page_title ||
+			overrideTitle ||
+			AdfDocumentHelper.getPageTitleFromPath(filePath);
+		return new AdfDocumentHelper(title, adfContent, filePath, frontmatter);
 	}
 
 	private static getPageTitleFromPath(filePath: string): string {
