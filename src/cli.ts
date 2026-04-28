@@ -150,7 +150,7 @@ const main = async (command: Command, options: Options) => {
 	assert(cmd, `Unknown command: "${command}"`);
 
 	for (const [key, opt] of Object.entries(expectedOptions)) {
-		if (opt.optional) return;
+		if (opt.optional) continue;
 
 		assert(
 			key in options,
