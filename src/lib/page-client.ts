@@ -48,11 +48,15 @@ export class PageClient {
 		return page ? (page as Required<PageBulk>) : null;
 	}
 
+	private get parentId(): string | undefined {
+		return this.document?.confluenceParentId ?? this.args.pageId;
+	}
+
 	async createPage(
 		document: AdfDocumentHelper,
 	): Promise<Required<CreatePage200Response>> {
 		const pageData = {
-			parentId: this.args.pageId,
+			parentId: this.parentId,
 			spaceId: this.args.spaceId,
 			status: "current" as const,
 			title: document.title,
@@ -79,7 +83,7 @@ export class PageClient {
 
 		const updateData = {
 			id: pageInfo.id,
-			parentId: this.args.pageId,
+			parentId: this.parentId,
 			status: "current" as const,
 			title: document.title,
 			body: {

@@ -17,6 +17,7 @@ interface AdfMark {
 interface Frontmatter {
 	confluence_page_id?: string;
 	confluence_page_title?: string;
+	confluence_parent_id?: string;
 }
 
 export function parseFrontmatter(content: string): {
@@ -35,6 +36,8 @@ export function parseFrontmatter(content: string): {
 		if (key === "confluence_page_id") frontmatter.confluence_page_id = value;
 		if (key === "confluence_page_title")
 			frontmatter.confluence_page_title = value;
+		if (key === "confluence_parent_id")
+			frontmatter.confluence_parent_id = value;
 	}
 
 	return { frontmatter, body: content.slice(match[0].length) };
@@ -46,6 +49,7 @@ export class AdfDocumentHelper {
 	readonly sourceFile?: string;
 	readonly confluencePageId?: string;
 	readonly confluencePageTitle?: string;
+	readonly confluenceParentId?: string;
 
 	constructor(
 		title: string,
@@ -58,6 +62,7 @@ export class AdfDocumentHelper {
 		this.sourceFile = sourceFile;
 		this.confluencePageId = frontmatter?.confluence_page_id;
 		this.confluencePageTitle = frontmatter?.confluence_page_title;
+		this.confluenceParentId = frontmatter?.confluence_parent_id;
 	}
 
 	static fromMarkdownFile(
