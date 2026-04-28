@@ -71,6 +71,23 @@ const commands = {
 			return client.sync();
 		},
 	},
+	"dry-run": {
+		description:
+			"Check if page needs syncing (exits 0 if stale/missing, 1 if up-to-date)",
+		options: { ...allOptions, file, title: options.title },
+		cmd: async (args: Options) => {
+			const document = AdfDocumentHelper.fromMarkdownFile(
+				args.file,
+				args.title,
+			);
+			const client = new PageClient(args, document);
+			const result = await client.checkFreshness();
+			if (result.status === "up-to-date") {
+				process.exitCode = 1;
+			}
+			return result;
+		},
+	},
 	list: {
 		description: "List pages in space",
 		options: allOptions,

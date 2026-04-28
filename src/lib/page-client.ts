@@ -133,6 +133,41 @@ export class PageClient {
 		return this.getPage(current.id);
 	}
 
+	async checkFreshness(): Promise<{
+		status: "missing" | "stale" | "up-to-date";
+		title: string;
+		pageUpdated?: string;
+	}> {
+		if (!this.document) {
+			throw new Error("Document is required for dry-run command");
+		}
+
+		const { title } = this.document;
+		const page = await this.findPageByTitle(title);
+
+		if (!page) {
+			return { status: "missing", title };
+		}
+
+		const currentContent = this.document.getContentAsString();
+		const existingPage = await this.getPage(page.id);
+		const existingContent = existingPage.body?.atlas_doc_format?.value ?? "";
+
+		if (currentContent !== existingContent) {
+			return {
+				status: "stale",
+				title,
+				pageUpdated: existingPage.version?.createdAt,
+			};
+		}
+
+		return {
+			status: "up-to-date",
+			title,
+			pageUpdated: existingPage.version?.createdAt,
+		};
+	}
+
 	async sync(): Promise<CreatePage200Response> {
 		if (!this.document) {
 			throw new Error("Document is required for create command");
