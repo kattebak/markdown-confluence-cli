@@ -133,7 +133,9 @@ export class PageClient {
 		return this.getPage(current.id);
 	}
 
-	async listPagesWithContent(): Promise<Map<string, { id: string; version: number }>> {
+	async listPagesWithContent(): Promise<
+		Map<string, { id: string; version: number }>
+	> {
 		const pages = new Map<string, { id: string; version: number }>();
 		let cursor: string | undefined;
 
@@ -153,7 +155,9 @@ export class PageClient {
 			}
 
 			const next = data._links?.next;
-			cursor = next ? new URL(next, "http://x").searchParams.get("cursor") ?? undefined : undefined;
+			cursor = next
+				? (new URL(next, "http://x").searchParams.get("cursor") ?? undefined)
+				: undefined;
 		} while (cursor);
 
 		return pages;

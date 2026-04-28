@@ -75,10 +75,17 @@ const commands = {
 	"dry-run": {
 		description:
 			"Check if pages need syncing. Accepts -f file or positional glob patterns.",
-		options: { ...allOptions, file: { ...file, optional: true }, title: options.title },
+		options: {
+			...allOptions,
+			file: { ...file, optional: true },
+			title: options.title,
+		},
 		cmd: async (args: Options, positionals: string[]) => {
 			const files = resolveFiles(args.file, positionals);
-			assert(files.length > 0, "No files specified. Use -f <file> or pass glob patterns as positional args.");
+			assert(
+				files.length > 0,
+				"No files specified. Use -f <file> or pass glob patterns as positional args.",
+			);
 
 			const client = new PageClient(args);
 			const index = await client.listPagesWithContent();
@@ -155,7 +162,10 @@ export type Options = Required<typeof values>;
 const command = positionals[0] as Command;
 const fileArgs = positionals.slice(1);
 
-function resolveFiles(fileOpt: string | undefined, positionals: string[]): string[] {
+function resolveFiles(
+	fileOpt: string | undefined,
+	positionals: string[],
+): string[] {
 	const files: string[] = [];
 
 	if (fileOpt) {
@@ -173,7 +183,6 @@ function resolveFiles(fileOpt: string | undefined, positionals: string[]): strin
 	return [...new Set(files)];
 }
 
-
 const usage = () => {
 	return (
 		`Usage: ${path.basename(process.argv[1])} [command] <options>\n\n` +
@@ -184,7 +193,11 @@ const usage = () => {
 	);
 };
 
-const main = async (command: Command, options: Options, positionals: string[]) => {
+const main = async (
+	command: Command,
+	options: Options,
+	positionals: string[],
+) => {
 	assert(command, `No command provided`);
 
 	const { options: expectedOptions, cmd } = commands[command] ?? {};
