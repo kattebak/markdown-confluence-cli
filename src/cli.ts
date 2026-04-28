@@ -84,7 +84,7 @@ const commands = {
 			const index = await client.listPagesWithContent();
 
 			const results = files.map((file) => {
-				const document = AdfDocumentHelper.fromMarkdownFile(file, file);
+				const document = AdfDocumentHelper.fromMarkdownFile(file, args.title);
 				const fileClient = new PageClient(args, document);
 				return fileClient.checkFreshnessAgainstIndex(index, file);
 			});
