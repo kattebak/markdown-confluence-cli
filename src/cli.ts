@@ -6,6 +6,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import { isAxiosError } from "axios";
 import { AttachmentsClient } from "./lib/attachments.js";
+import { validateAuthMode } from "./lib/auth-mode.js";
 import { AdfDocumentHelper } from "./lib/document.js";
 import { PageClient } from "./lib/page-client.js";
 
@@ -20,12 +21,14 @@ const options = {
 		short: "u",
 		description: "Confluence username/email",
 		default: process.env.CONFLUENCE_USER,
+		optional: true,
 	},
 	token: {
 		type: "string",
 		short: "t",
 		description: "Confluence API token",
 		default: process.env.CONFLUENCE_TOKEN,
+		optional: true,
 	},
 	pageId: {
 		type: "string",
@@ -55,12 +58,14 @@ const options = {
 		description:
 			"Forge web trigger URL. Routes writes through the app identity instead of --user/--token",
 		default: process.env.CONFLUENCE_WEBTRIGGER_URL,
+		optional: true,
 	},
 	webtriggerSecret: {
 		type: "string",
 		short: "s",
 		description: "Shared secret for the Forge web trigger proxy",
 		default: process.env.CONFLUENCE_WEBTRIGGER_SECRET,
+		optional: true,
 	},
 	title: {
 		type: "string",
@@ -223,6 +228,10 @@ const main = async (
 			key in options,
 			`Expected required option: --${key} | -${opt.short} <${opt.type}>`,
 		);
+	}
+
+	if ("user" in expectedOptions || "webtriggerUrl" in expectedOptions) {
+		validateAuthMode(options);
 	}
 
 	return cmd(options, positionals);
