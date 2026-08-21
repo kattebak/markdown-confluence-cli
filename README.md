@@ -41,13 +41,13 @@ Commands: sync list dump upload list-attachments get get-attachment
 
 By default, pages are authored by whichever human's `--user`/`--token` you pass. To have pages
 authored by an app identity instead, deploy the Forge app in `forge/` and route the CLI through
-its web trigger with `--webtrigger-url`/`--webtrigger-secret` (or `CONFLUENCE_WEBTRIGGER_URL` /
+its web trigger with `--webtriggerUrl`/`--webtriggerSecret` (or `CONFLUENCE_WEBTRIGGER_URL` /
 `CONFLUENCE_WEBTRIGGER_SECRET`). `--user`/`--token` are not required in this mode; `--domain` is
 still used to build request URLs and CLI link output.
 
 ```bash
 npx @kattebak/markdown-confluence-cli sync -f README.md -d $CONFLUENCE_DOMAIN -i $CONFLUENCE_SPACE_ID \
-  --webtrigger-url "$CONFLUENCE_WEBTRIGGER_URL" --webtrigger-secret "$CONFLUENCE_WEBTRIGGER_SECRET"
+  --webtriggerUrl "$CONFLUENCE_WEBTRIGGER_URL" --webtriggerSecret "$CONFLUENCE_WEBTRIGGER_SECRET"
 ```
 
 To deploy the app and wire it up (from `forge/`, see `forge/README.md`):

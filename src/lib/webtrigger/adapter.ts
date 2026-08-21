@@ -10,15 +10,16 @@ import {
 const toHeaderRecord = (
 	headers: InternalAxiosRequestConfig["headers"],
 ): Record<string, string> => {
-	if (headers instanceof AxiosHeaders) {
-		const record: Record<string, string> = {};
-		for (const [key, value] of Object.entries(headers.toJSON())) {
-			if (typeof value === "string") record[key] = value;
-		}
-		return record;
-	}
+	const source: Record<string, unknown> =
+		headers instanceof AxiosHeaders
+			? headers.toJSON()
+			: ((headers as Record<string, unknown> | undefined) ?? {});
 
-	return (headers as Record<string, string> | undefined) ?? {};
+	const record: Record<string, string> = {};
+	for (const [key, value] of Object.entries(source)) {
+		if (typeof value === "string") record[key.toLowerCase()] = value;
+	}
+	return record;
 };
 
 export const createWebTriggerAdapter = (

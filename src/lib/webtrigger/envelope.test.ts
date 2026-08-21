@@ -64,6 +64,31 @@ test("encodeRequestEnvelope base64-encodes a multipart FormData body with its bo
 	assert.ok(decoded.includes("hello"));
 });
 
+test("encodeRequestEnvelope replaces a differently-cased Content-Type header instead of duplicating it", async () => {
+	const form = new FormData();
+	form.append("file", new Blob(["hello"], { type: "text/plain" }), "hello.txt");
+
+	const envelope = await encodeRequestEnvelope({
+		url: "https://example.atlassian.net/wiki/rest/api/content/1/child/attachment",
+		method: "put",
+		headers: { "Content-Type": "multipart/form-data" },
+		data: form,
+	});
+
+	const headerKeys = Object.keys(envelope.headers ?? {}).map((key) =>
+		key.toLowerCase(),
+	);
+	assert.strictEqual(
+		headerKeys.filter((key) => key === "content-type").length,
+		1,
+	);
+	assert.ok(
+		envelope.headers?.["content-type"]?.startsWith(
+			"multipart/form-data; boundary=",
+		),
+	);
+});
+
 test("decodeResponseEnvelope returns the raw text body for a json envelope", () => {
 	const decoded = decodeResponseEnvelope({
 		statusCode: 200,

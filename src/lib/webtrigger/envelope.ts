@@ -34,11 +34,16 @@ export const encodeRequestEnvelope = async (params: {
 		`Refusing to proxy a non-wiki path: ${target.pathname}`,
 	);
 
+	const normalizedHeaders: Record<string, string> = {};
+	for (const [key, value] of Object.entries(params.headers)) {
+		normalizedHeaders[key.toLowerCase()] = value;
+	}
+
 	const envelope: RequestEnvelope = {
 		method: params.method.toUpperCase(),
 		path: target.pathname,
 		query: target.search ? target.search.slice(1) : undefined,
-		headers: params.headers,
+		headers: normalizedHeaders,
 	};
 
 	if (typeof FormData !== "undefined" && params.data instanceof FormData) {
