@@ -11,7 +11,7 @@ import {
 	type GetAttachmentById200Response,
 	Configuration as V2Configuration,
 } from "@kattebak/confluence-axios-client-v2";
-import type { Options } from "../cli";
+import type { Options } from "../cli.js";
 
 export interface UploadOptions {
 	minorEdit?: boolean;

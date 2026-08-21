@@ -5,9 +5,9 @@ import { globSync } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { isAxiosError } from "axios";
-import { AttachmentsClient } from "./lib/attachments";
-import { AdfDocumentHelper } from "./lib/document";
-import { PageClient } from "./lib/page-client";
+import { AttachmentsClient } from "./lib/attachments.js";
+import { AdfDocumentHelper } from "./lib/document.js";
+import { PageClient } from "./lib/page-client.js";
 
 const options = {
 	file: {

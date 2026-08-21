@@ -7,9 +7,9 @@ import {
 	PageApi,
 	type PageBulk,
 } from "@kattebak/confluence-axios-client-v2";
-import type { Options } from "../cli";
-import { AttachmentsClient } from "./attachments";
-import type { AdfDocumentHelper, AdfNode } from "./document";
+import type { Options } from "../cli.js";
+import { AttachmentsClient } from "./attachments.js";
+import type { AdfDocumentHelper, AdfNode } from "./document.js";
 
 const isLocalFile = (url?: string): boolean => {
 	// Check if URL is a local file path (starts with ./ or ../ or is a relative path)
