@@ -20,6 +20,12 @@ jobs:
         run: npm ci
       - name: Test
         run: npm test
+      - name: Install forge app
+        run: npm ci
+        working-directory: forge
+      - name: Test forge app
+        run: npm test
+        working-directory: forge
 
   release:
     needs: test

@@ -12,6 +12,7 @@ import {
 	Configuration as V2Configuration,
 } from "@kattebak/confluence-axios-client-v2";
 import type { Options } from "../cli.js";
+import { createWebTriggerAxios } from "./webtrigger/create-axios.js";
 
 export interface UploadOptions {
 	minorEdit?: boolean;
@@ -23,19 +24,29 @@ export class AttachmentsClient {
 	private attachmentApiv2: AttachmentApi;
 
 	constructor(args: Options) {
+		const webTriggerAxios = createWebTriggerAxios(args);
+
 		const v1Configuration = new V1Configuration({
 			basePath: `https://${args.domain}`,
 			username: args.user,
 			password: args.token,
 		});
-		this.attachmentApiv1 = new ContentAttachmentsApiV1(v1Configuration);
+		this.attachmentApiv1 = new ContentAttachmentsApiV1(
+			v1Configuration,
+			undefined,
+			webTriggerAxios,
+		);
 
 		const v2Configuration = new V2Configuration({
 			basePath: `https://${args.domain}/wiki/api/v2`,
 			username: args.user,
 			password: args.token,
 		});
-		this.attachmentApiv2 = new AttachmentApi(v2Configuration);
+		this.attachmentApiv2 = new AttachmentApi(
+			v2Configuration,
+			undefined,
+			webTriggerAxios,
+		);
 	}
 
 	async uploadAttachment(
