@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { AdfDocumentHelper, parseFrontmatter } from "./document";
+import { AdfDocumentHelper, parseFrontmatter } from "./document.js";
 
 test("AdfDocumentHelper.listImages returns an array (README.md)", () => {
 	const adfDoc = AdfDocumentHelper.fromMarkdownFile("README.md");
@@ -31,12 +31,12 @@ test("AdfDocumentHelper overrides title if provided", () => {
 });
 
 test("AdfDocumentHelper handles special characters in file name", () => {
-	const filePath = path.join(__dirname, "spécial-chär.md");
+	const filePath = path.join(import.meta.dirname, "spécial-chär.md");
 	// Create the file for this test
-	require("node:fs").writeFileSync(filePath, "# Special chars\n");
+	fs.writeFileSync(filePath, "# Special chars\n");
 	const adfDoc = AdfDocumentHelper.fromMarkdownFile(filePath);
 	assert.strictEqual(adfDoc.title, "spécial-chär");
-	require("node:fs").unlinkSync(filePath);
+	fs.unlinkSync(filePath);
 });
 
 test("parseFrontmatter extracts confluence_page_title", () => {
