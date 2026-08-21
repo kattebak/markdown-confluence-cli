@@ -37,7 +37,7 @@
 	"dependencies": {
 		"@kattebak/confluence-axios-client-v1": "^1.0.1",
 		"@kattebak/confluence-axios-client-v2": "^1.0.1",
-		"marklassian": "1.0.4"
+		"marklassian": "1.2.1"
 	},
 	"repository": {
 		"type": "git",
