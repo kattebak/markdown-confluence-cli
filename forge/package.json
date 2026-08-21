@@ -1,0 +1,22 @@
+{
+	"name": "markdown-confluence-forge-app",
+	"version": "0.0.1",
+	"private": true,
+	"description": "Forge app that publishes Confluence pages as the app identity via a web trigger proxy",
+	"type": "module",
+	"scripts": {
+		"test": "tsc --noEmit -p tsconfig.json"
+	},
+	"devDependencies": {
+		"@forge/cli": "^13.4.0",
+		"typescript": "^5.9.2"
+	},
+	"dependencies": {
+		"@forge/api": "^8.0.4"
+	},
+	"allowScripts": {
+		"@forge/cli@13.4.0": true,
+		"cloudflared@0.7.0": true,
+		"keytar@7.9.0": true
+	}
+}

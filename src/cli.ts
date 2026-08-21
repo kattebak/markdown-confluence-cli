@@ -49,6 +49,19 @@ const options = {
 		description: "Confluence space ID",
 		default: process.env.CONFLUENCE_SPACE_ID,
 	},
+	webtriggerUrl: {
+		type: "string",
+		short: "w",
+		description:
+			"Forge web trigger URL. Routes writes through the app identity instead of --user/--token",
+		default: process.env.CONFLUENCE_WEBTRIGGER_URL,
+	},
+	webtriggerSecret: {
+		type: "string",
+		short: "s",
+		description: "Shared secret for the Forge web trigger proxy",
+		default: process.env.CONFLUENCE_WEBTRIGGER_SECRET,
+	},
 	title: {
 		type: "string",
 		short: "l",

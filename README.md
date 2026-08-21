@@ -30,10 +30,37 @@ Options:
   -a --attachmentId <Attachment ID>
   -d --domain <Confluence domain (e.g., your-company.atlassian.net)>
   -i --spaceId <Confluence space ID>
+  -w --webtriggerUrl <Forge web trigger URL. Routes writes through the app identity instead of --user/--token>
+  -s --webtriggerSecret <Shared secret for the Forge web trigger proxy>
   -l --title <Override page title (default: derived from file name)>
 
 Commands: sync list dump upload list-attachments get get-attachment
 ```
+
+### Publishing as an app
+
+By default, pages are authored by whichever human's `--user`/`--token` you pass. To have pages
+authored by an app identity instead, deploy the Forge app in `forge/` and route the CLI through
+its web trigger with `--webtrigger-url`/`--webtrigger-secret` (or `CONFLUENCE_WEBTRIGGER_URL` /
+`CONFLUENCE_WEBTRIGGER_SECRET`). `--user`/`--token` are not required in this mode; `--domain` is
+still used to build request URLs and CLI link output.
+
+```bash
+npx @kattebak/markdown-confluence-cli sync -f README.md -d $CONFLUENCE_DOMAIN -i $CONFLUENCE_SPACE_ID \
+  --webtrigger-url "$CONFLUENCE_WEBTRIGGER_URL" --webtrigger-secret "$CONFLUENCE_WEBTRIGGER_SECRET"
+```
+
+To deploy the app and wire it up (from `forge/`, see `forge/README.md`):
+
+```bash
+forge deploy -e development
+forge install --site <your-site>.atlassian.net --product confluence --confirm-scopes
+forge variables set --encrypt -e development SYNC_SECRET <a-random-secret>
+forge webtrigger -e development
+```
+
+A site admin must run `forge install` on a production site — installing a Forge app always
+requires site-admin permission, whether from this CLI or the Forge web console.
 
 ### Example
 

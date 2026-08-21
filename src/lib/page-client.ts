@@ -10,6 +10,7 @@ import {
 import type { Options } from "../cli.js";
 import { AttachmentsClient } from "./attachments.js";
 import type { AdfDocumentHelper, AdfNode } from "./document.js";
+import { createWebTriggerAxios } from "./webtrigger/create-axios.js";
 
 const isLocalFile = (url?: string): boolean => {
 	// Check if URL is a local file path (starts with ./ or ../ or is a relative path)
@@ -34,7 +35,11 @@ export class PageClient {
 			username: args.user,
 			password: args.token,
 		});
-		this.pageApi = new PageApi(configuration);
+		this.pageApi = new PageApi(
+			configuration,
+			undefined,
+			createWebTriggerAxios(args),
+		);
 	}
 
 	async findPageByTitle(title: string): Promise<Required<PageBulk> | null> {
