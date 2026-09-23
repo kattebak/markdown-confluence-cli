@@ -118,6 +118,14 @@ export class PageClient {
 		return data as Required<CreatePage200Response>;
 	}
 
+	async deletePage(pageId: string): Promise<{ id: string; deleted: true }> {
+		assert(/^\d+$/.test(pageId), `Page id must be all digits: "${pageId}"`);
+
+		await this.pageApi.deletePage({ id: parseInt(pageId, 10) });
+
+		return { id: pageId, deleted: true };
+	}
+
 	async listPages(): Promise<MultiEntityResultPage> {
 		const { data } = await this.pageApi.getPagesInSpace({
 			id: parseInt(this.args.spaceId, 10),
