@@ -1,6 +1,10 @@
 import assert from "node:assert";
-import type { AxiosAdapter, InternalAxiosRequestConfig } from "axios";
-import { AxiosHeaders } from "axios";
+import type {
+	AxiosAdapter,
+	AxiosResponse,
+	InternalAxiosRequestConfig,
+} from "axios";
+import { AxiosError, AxiosHeaders } from "axios";
 import {
 	decodeResponseEnvelope,
 	encodeRequestEnvelope,
@@ -50,7 +54,7 @@ export const createWebTriggerAdapter = (
 		const responseEnvelope = (await response.json()) as ResponseEnvelope;
 		const decoded = decodeResponseEnvelope(responseEnvelope);
 
-		return {
+		const result: AxiosResponse = {
 			data: decoded.data,
 			status: decoded.status,
 			statusText: "",
@@ -58,5 +62,19 @@ export const createWebTriggerAdapter = (
 			config,
 			request: undefined,
 		};
+
+		if (config.validateStatus && !config.validateStatus(result.status)) {
+			throw new AxiosError(
+				`Request failed with status code ${result.status}`,
+				result.status >= 500
+					? AxiosError.ERR_BAD_RESPONSE
+					: AxiosError.ERR_BAD_REQUEST,
+				config,
+				undefined,
+				result,
+			);
+		}
+
+		return result;
 	};
 };

@@ -67,6 +67,11 @@ const options = {
 		default: process.env.CONFLUENCE_WEBTRIGGER_SECRET,
 		optional: true,
 	},
+	id: {
+		type: "string",
+		short: "I",
+		description: "Page ID to delete",
+	},
 	title: {
 		type: "string",
 		short: "l",
@@ -75,7 +80,7 @@ const options = {
 	},
 } as const;
 
-const { file, attachmentId, pageId, ...allOptions } = options;
+const { file, attachmentId, pageId, id, ...allOptions } = options;
 
 const commands = {
 	sync: {
@@ -166,6 +171,14 @@ const commands = {
 			return attachmentGetter.getAttachment(args.attachmentId);
 		},
 	},
+	delete: {
+		describe: "Move a page to the trash by id",
+		options: { ...allOptions, id },
+		cmd: (args: Options) => {
+			const client = new PageClient(args);
+			return client.deletePage(args.id);
+		},
+	},
 } as const;
 
 const { values, positionals } = parseArgs({
@@ -247,6 +260,7 @@ main(command, values as Options, fileArgs)
 
 		if (isAxiosError(error)) {
 			console.error(`Error: %s`, error.message);
+			if (error.response?.data) console.error(error.response.data);
 			process.exit(1);
 		}
 

@@ -33,5 +33,9 @@ forge variables set --encrypt -e development SYNC_SECRET <a-random-secret>
 forge webtrigger -e development
 ```
 
-Scopes: `read:page:confluence`, `write:page:confluence`, `read:attachment:confluence`,
-`write:confluence-file` (v1 attachment upload), `read:space:confluence`.
+Scopes: `read:page:confluence`, `write:page:confluence`, `delete:page:confluence` (the `delete`
+command), `read:attachment:confluence`, `write:confluence-file` (v1 attachment upload),
+`read:space:confluence`.
+
+An existing installation picks up a new scope only after `forge deploy` and
+`forge install --upgrade --confirm-scopes`.

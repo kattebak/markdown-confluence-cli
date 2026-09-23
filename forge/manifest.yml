@@ -11,6 +11,7 @@ permissions:
   scopes:
     - read:page:confluence
     - write:page:confluence
+    - delete:page:confluence
     - read:attachment:confluence
     - write:confluence-file
     - read:space:confluence

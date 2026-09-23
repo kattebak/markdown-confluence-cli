@@ -32,9 +32,10 @@ Options:
   -i --spaceId <Confluence space ID>
   -w --webtriggerUrl <Forge web trigger URL. Routes writes through the app identity instead of --user/--token>
   -s --webtriggerSecret <Shared secret for the Forge web trigger proxy>
+  -I --id <Page ID to delete>
   -l --title <Override page title (default: derived from file name)>
 
-Commands: sync list dump upload list-attachments get get-attachment
+Commands: sync list dump upload list-attachments get get-attachment delete
 ```
 
 ### Publishing as an app
