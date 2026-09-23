@@ -15,6 +15,13 @@ permissions:
     - read:attachment:confluence
     - write:confluence-file
     - read:space:confluence
+    - delete:attachment:confluence
+    - read:comment:confluence
+    - write:comment:confluence
+    - read:content.property:confluence
+    - write:content.property:confluence
+    - read:label:confluence
+    - write:label:confluence
 
 app:
   runtime:
