@@ -62,19 +62,12 @@ export class AttachmentsClient {
 		const fileBuffer = fs.readFileSync(filePath);
 
 		const file = new File([fileBuffer], fileName);
-		const minorEditFile = new File(
-			[options.minorEdit ? "true" : "false"],
-			"minorEdit",
-		);
-		const commentFile = options.comment
-			? new File([options.comment], "comment")
-			: undefined;
 
 		const response = await this.attachmentApiv1.createOrUpdateAttachments({
 			id: pageId,
 			file: file,
-			minorEdit: minorEditFile,
-			comment: commentFile,
+			minorEdit: options.minorEdit ? "true" : "false",
+			comment: options.comment,
 		});
 
 		return response.data.results[0] as Required<Content>;

@@ -35,7 +35,7 @@
 		"typescript": "^7.0.2"
 	},
 	"dependencies": {
-		"@kattebak/confluence-axios-client-v1": "^1.0.1",
+		"@kattebak/confluence-axios-client-v1": "^1.0.2",
 		"@kattebak/confluence-axios-client-v2": "^1.0.1",
 		"marklassian": "1.0.4"
 	},
