@@ -1,9 +1,11 @@
 import assert from "node:assert";
-import type { AxiosInstance } from "axios" with {
-	"resolution-mode": "require",
-};
+import type { BaseAPI } from "@kattebak/confluence-axios-client-v1/dist/base.js";
 import axios from "axios";
 import { createWebTriggerAdapter } from "./adapter.js";
+
+type ClientAxiosInstance = NonNullable<
+	ConstructorParameters<typeof BaseAPI>[2]
+>;
 
 export interface WebTriggerArgs {
 	webtriggerUrl?: string;
@@ -12,7 +14,7 @@ export interface WebTriggerArgs {
 
 export const createWebTriggerAxios = (
 	args: WebTriggerArgs,
-): AxiosInstance | undefined => {
+): ClientAxiosInstance | undefined => {
 	if (!args.webtriggerUrl && !args.webtriggerSecret) {
 		return undefined;
 	}
@@ -31,5 +33,5 @@ export const createWebTriggerAxios = (
 	});
 	// The generated clients are CommonJS, so their AxiosInstance comes from axios'
 	// CJS typings, whose unique symbols differ from the ESM copy since axios 1.19.
-	return instance as AxiosInstance;
+	return instance as ClientAxiosInstance;
 };
