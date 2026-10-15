@@ -1,5 +1,8 @@
 import assert from "node:assert";
-import axios, { type AxiosInstance } from "axios";
+import type { AxiosInstance } from "axios" with {
+	"resolution-mode": "require",
+};
+import axios from "axios";
 import { createWebTriggerAdapter } from "./adapter.js";
 
 export interface WebTriggerArgs {
@@ -23,7 +26,10 @@ export const createWebTriggerAxios = (
 		"--webtrigger-secret is required when --webtrigger-url is set",
 	);
 
-	return axios.create({
+	const instance: unknown = axios.create({
 		adapter: createWebTriggerAdapter(args.webtriggerUrl, args.webtriggerSecret),
 	});
+	// The generated clients are CommonJS, so their AxiosInstance comes from axios'
+	// CJS typings, whose unique symbols differ from the ESM copy since axios 1.19.
+	return instance as AxiosInstance;
 };
